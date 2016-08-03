@@ -1,0 +1,20 @@
+{
+    "name": "rooftopcms/rooftop-request-parser",
+    "description": "Manipulate the REST request or server variables to alter queries or remove/change default params",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Rooftop CMS",
+            "email": "hello@rooftopcms.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://wpackagist.org"
+        }
+    ],
+    "type": "wordpress-muplugin",
+    "require": {
+    }
+}
