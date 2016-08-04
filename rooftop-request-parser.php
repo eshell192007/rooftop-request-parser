@@ -32,5 +32,5 @@ add_action( 'rest_api_init', function() {
     }
 
     $endpoints_property->setValue( $wp_rest_server, $endpoints );
-}, 10 );
+}, 11 );
 ?>
