@@ -9,6 +9,57 @@ Plugin URI: http://errorstudio.co.uk
 Text Domain: rooftop-request-parser
 */
 
+require_once dirname( __FILE__ ) . '/class-rooftop-custom-errors.php';
+
+/**
+ * return a bool based on the current request headers or path.
+ * if we're in preview mode, or including drafts - return true.
+ */
+add_filter( 'rooftop_include_drafts', function() {
+    $preview_mode   = strtolower( @$_SERVER["HTTP_PREVIEW"] )== "true";
+    $include_drafts = strtolower( @$_SERVER["HTTP_INCLUDE_DRAFTS"] ) == "true";
+    $preview_route  = preg_match( "/\/preview$/", parse_url( @$_SERVER["REQUEST_URI"] )['path'] );
+
+    if( $preview_mode || $include_drafts || $preview_route ) {
+        return true;
+    }else {
+        return false;
+    }
+}, 1);
+
+/**
+ * return an array of valid post statuses based on the current request.
+ */
+add_filter( 'rooftop_published_statuses', function() {
+    if( apply_filters( 'rooftop_include_drafts', false ) ) {
+        return array( 'publish', 'draft', 'scheduled', 'pending' );
+    }else {
+        return array( 'publish' );
+    }
+}, 1);
+
+/**
+ * if any of the post types are in anything but a published state and we're NOT in preview mode,
+ * we should send back a response which mimics the WP_Error auth failed response
+ *
+ * note: we need to add this hook since we can't alter the query args on a single-resource endpoint (rest_post_query is only called on collections)
+ */
+add_action( 'rest_api_init', function() {
+    $types = get_post_types( array( 'public' => true, 'show_in_rest' => true ) );
+
+    foreach( $types as $key => $type ) {
+        add_action( "rest_prepare_$type", function( $response ) {
+            global $post;
+
+            $include_drafts = apply_filters( 'rooftop_include_drafts', false );
+            if( $post->post_status != 'publish' && !$include_drafts ) {
+                $response = new Custom_WP_Error( 'unauthorized', 'Authentication failed', array( 'status'=>403 ) );
+            }
+            return $response;
+        });
+    }
+}, 10);
+
 /**
  * Change the maximum per_page collection arg to 99999999 (effectively removing the limit)
  */
