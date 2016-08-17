@@ -44,6 +44,9 @@ class Custom_WP_Error extends WP_Error {
     public function get_data(){
         return $this->data;
     }
+    public function set_status($status) {
+        $this->status = $status;
+    }
 }
 
 ?>
