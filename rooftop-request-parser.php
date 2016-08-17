@@ -84,4 +84,11 @@ add_action( 'rest_api_init', function() {
 
     $endpoints_property->setValue( $wp_rest_server, $endpoints );
 }, 11 );
+
+add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
+    $per_page = @$_GET['per_page'];
+    if( $per_page == "" && !$served ) {
+        $request->set_param( 'per_page', 10);
+    }
+}, 1, 4);
 ?>
