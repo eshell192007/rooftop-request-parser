@@ -61,7 +61,8 @@ add_action( 'rest_api_init', function() {
 }, 10);
 
 /**
- * Change the maximum per_page collection arg to 99999999 (effectively removing the limit)
+ * Change some of the default query limits set in wp-api.
+ * Ie. Max per_page collection arg to 99999999 (effectively removing the limit)
  */
 add_action( 'rest_api_init', function() {
     global $wp_rest_server;
@@ -74,8 +75,14 @@ add_action( 'rest_api_init', function() {
     $endpoints_property->setAccessible( true );
     $endpoints = $endpoints_property->getValue( $wp_rest_server );
 
+    // by default, we can only orderby a limited set of attributes
+    $permitted_orderby_values = array( 'none', 'author', 'modified', 'name', 'type', 'parent', 'menu_order', 'meta_value', 'meta_value_num', 'post__in', 'post_name__in' );
+
     foreach( $endpoints as $endpoint => $resource ) {
         foreach( $resource as $object => $params ) {
+            if( $object == 'args' && isset( $params['args']['orderby'] ) && isset( $params['args']['orderby']['enum'] ) ) {
+                $endpoints[$endpoint][$object]['args']['orderby']['enum'] = array_merge( $endpoints[$endpoint][$object]['args']['orderby']['enum'], $permitted_orderby_values );
+            }
             if( $object == 'args' && isset( $params['args']['per_page'] ) ) {
                 $endpoints[$endpoint][$object]['args']['per_page']['maximum'] = 99999999;
             }
