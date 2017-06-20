@@ -57,6 +57,27 @@ add_action( 'rest_api_init', function() {
             }
             return $response;
         });
+
+        // add support for the filter parameter: https://github.com/WP-API/rest-filter/blob/master/plugin.php
+
+        add_filter( "rest_${type}_query", function( $args, $request) {
+            if( empty( $request['filter'] ) || !is_array( $request['filter'] ) ) {
+                return $args;
+            }
+
+            $filter = $request['filter'];
+            if ( isset( $filter['posts_per_page'] ) && ( (int) $filter['posts_per_page'] >= 1 ) ) {
+                $args['posts_per_page'] = $filter['posts_per_page'];
+            }
+            global $wp;
+            $vars = apply_filters( 'query_vars', $wp->public_query_vars );
+            foreach ( $vars as $var ) {
+                if ( isset( $filter[ $var ] ) ) {
+                    $args[ $var ] = $filter[ $var ];
+                }
+            }
+            return $args;
+        }, 10, 2);
     }
 }, 10);
 
@@ -97,5 +118,12 @@ add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
     if( $per_page == "" && !$served ) {
         $request->set_param( 'per_page', 10);
     }
+
+    // we need to ensure backwards compatibility between wp-api beta15 and our client libs, which
+    // send post__in rather than include as a parameter
+    if( isset( $request['post__in'] ) ) {
+        $request->set_param( 'include', $request['post__in'] );
+    }
+
 }, 1, 4);
 ?>
