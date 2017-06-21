@@ -105,7 +105,7 @@ add_action( 'rest_api_init', function() {
                 $endpoints[$endpoint][$object]['args']['orderby']['enum'] = array_merge( $endpoints[$endpoint][$object]['args']['orderby']['enum'], $permitted_orderby_values );
             }
             if( $object == 'args' && isset( $params['args']['per_page'] ) ) {
-                $endpoints[$endpoint][$object]['args']['per_page']['maximum'] = 99999999;
+                $endpoints[$endpoint][$object]['args']['posts_per_page']['maximum'] = 99999999;
             }
         }
     }
@@ -116,7 +116,7 @@ add_action( 'rest_api_init', function() {
 add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
     $per_page = @$_GET['per_page'];
     if( $per_page == "" && !$served ) {
-        $request->set_param( 'per_page', 10);
+        $request->set_param( 'posts_per_page', 10);
     }
 
     // we need to ensure backwards compatibility between wp-api beta15 and our client libs, which
@@ -126,4 +126,10 @@ add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
     }
 
 }, 1, 4);
+
+
+add_filter( 'query_vars', function( $vars ) {
+    $vars = array_merge( $vars, array( 'meta_key', 'meta_value', 'meta_compare', 'meta_query', 'tax_query' ) );
+    return $vars;
+}, 1, 1 );
 ?>
