@@ -66,8 +66,8 @@ add_action( 'rest_api_init', function() {
             }
 
             $filter = $request['filter'];
-            if ( isset( $filter['posts_per_page'] ) && ( (int) $filter['posts_per_page'] >= 1 ) ) {
-                $args['posts_per_page'] = $filter['posts_per_page'];
+            if ( isset( $filter['per_page'] ) && ( (int) $filter['per_page'] >= 1 ) ) {
+                $args['per_page'] = $filter['per_page'];
             }
             global $wp;
             $vars = apply_filters( 'query_vars', $wp->public_query_vars );
@@ -105,7 +105,8 @@ add_action( 'rest_api_init', function() {
                 $endpoints[$endpoint][$object]['args']['orderby']['enum'] = array_merge( $endpoints[$endpoint][$object]['args']['orderby']['enum'], $permitted_orderby_values );
             }
             if( $object == 'args' && isset( $params['args']['per_page'] ) ) {
-                $endpoints[$endpoint][$object]['args']['posts_per_page']['maximum'] = 99999999;
+                $endpoints[$endpoint][$object]['args']['per_page']['minimum'] = -1;
+                $endpoints[$endpoint][$object]['args']['per_page']['maximum'] = 99999999;
             }
         }
     }
@@ -116,7 +117,7 @@ add_action( 'rest_api_init', function() {
 add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
     $per_page = @$_GET['per_page'];
     if( $per_page == "" && !$served ) {
-        $request->set_param( 'posts_per_page', 10);
+        $request->set_param( 'per_page', 10);
     }
 
     // we need to ensure backwards compatibility between wp-api beta15 and our client libs, which
