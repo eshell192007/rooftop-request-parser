@@ -126,6 +126,10 @@ add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
         $request->set_param( 'include', $request['post__in'] );
     }
 
+    if( isset( $request['filter'] ) && isset( $request['filter']['post__in'] ) ) {
+        $request->set_param( 'include', $request['filter']['post__in'] );
+    }
+
 }, 1, 4);
 
 
