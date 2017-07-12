@@ -126,23 +126,24 @@ add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
     // add permitted filter keys as we need to ensure backwards compatibility between wp-api beta15
     // and our client libs, which send post__in in the filter parameter, rather than include as a parameter
     $parameter_mappings = array(
-        'author'         => 'author__in',
-        'author_exclude' => 'author__not_in',
-        'exclude'        => 'post__not_in',
-        'include'        => 'post__in',
-        'menu_order'     => 'menu_order',
-        'offset'         => 'offset',
-        'order'          => 'order',
-        'orderby'        => 'orderby',
-        'page'           => 'paged',
-        'parent'         => 'post_parent__in',
-        'parent_exclude' => 'post_parent__not_in',
-        'search'         => 's',
-        'slug'           => 'post_name__in',
-        'status'         => 'post_status',
+        'author__in'          => 'author',
+        'author__not_in'      => 'author_exclude',
+        'post__not_in'        => 'exclude',
+        'post__in'            => 'include',
+        'menu_order'          => 'menu_order',
+        'offset'              => 'offset',
+        'order'               => 'order',
+        'orderby'             => 'orderby',
+        'paged'               => 'page',
+        'post_parent__in'     => 'parent',
+        'post_parent'         => 'parent',
+        'post_parent__not_in' => 'parent_exclude',
+        's'                   => 'search',
+        'post_name__in'       => 'slug',
+        'post_status'         => 'status'
     );
 
-    foreach( $parameter_mappings as $key => $param ) {
+    foreach( $parameter_mappings as $param => $key ) {
         if( isset( $request['filter'] ) && isset( $request['filter'][$param] ) ) {
             $request->set_param( $key, $request['filter'][$param] );
         }
