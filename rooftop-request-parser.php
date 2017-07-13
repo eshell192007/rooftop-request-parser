@@ -140,7 +140,8 @@ add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
         'post_parent__not_in' => 'parent_exclude',
         's'                   => 'search',
         'post_name__in'       => 'slug',
-        'post_status'         => 'status'
+        'post_status'         => 'status',
+        'posts_per_page'      => 'per_page'
     );
 
     foreach( $parameter_mappings as $param => $key ) {
