@@ -156,11 +156,17 @@ add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
         $request_filters = $request['filter'];
 
         if( isset( $request['filter'][$filter_param] ) ) {
-            $filter_value = array_map( function( $i) {
-                return (int)$i;
-            }, $request_filters[$filter_param] );
+            if( is_array( $request['filter'][$filter_param] ) ) {
+                $filter_value = array_map( function( $i) {
+                    return (int)$i;
+                }, $request_filters[$filter_param] );
 
-            $request_filters[$filter_param] = array_filter( $filter_value );
+                $filter_value = array_filter( $filter_value );
+            }else {
+                $filter_value = (int)$request['filter'][$filter_param];
+            }
+
+            $request_filters[$filter_param] = $filter_value;
         }
 
         $request->set_param( 'filter', $request_filters );
