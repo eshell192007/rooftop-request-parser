@@ -79,6 +79,13 @@ add_action( 'rest_api_init', function() {
 
             return $args;
         }, 10, 2);
+
+        add_filter( "rest_${type}_collection_params", function( $params, $type ) {
+            if( isset( $params['order'] ) && isset( $params['order']['enum'] ) ) {
+                $params['order']['enum'] = array_merge($params['order']['enum'], array('ASC','DESC'));
+            }
+            return $params;
+        }, 10, 2 );
     }
 }, 10);
 
@@ -121,8 +128,6 @@ add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
         $request->set_param( 'per_page', 10);
     }
 
-
-
     // add permitted filter keys as we need to ensure backwards compatibility between wp-api beta15
     // and our client libs, which send post__in in the filter parameter, rather than include as a parameter
     $parameter_mappings = array(
@@ -140,8 +145,26 @@ add_action( 'rest_pre_dispatch', function( $served, $server, $request ) {
         'post_parent__not_in' => 'parent_exclude',
         's'                   => 'search',
         'post_name__in'       => 'slug',
-        'post_status'         => 'status'
+        'post_status'         => 'status',
+        'posts_per_page'      => 'per_page'
     );
+
+    // remove any non-integer values in our filters (this is for some backwards compatibility with our RT clients.
+    // arguments passed on the query string (not in filters[]) wont go through this cleanup - they need to be valid args.
+    $integer_filter_types = ['author__in', 'author__not_in', 'post__not_in', 'post__in', 'post_parent__in', 'post_parent', 'post_parent__not_in'];
+    foreach( $integer_filter_types as $filter_param ) {
+        $request_filters = $request['filter'];
+
+        if( isset( $request['filter'][$filter_param] ) ) {
+            $filter_value = array_map( function( $i) {
+                return (int)$i;
+            }, $request_filters[$filter_param] );
+
+            $request_filters[$filter_param] = array_filter( $filter_value );
+        }
+
+        $request->set_param( 'filter', $request_filters );
+    }
 
     foreach( $parameter_mappings as $param => $key ) {
         if( isset( $request['filter'] ) && isset( $request['filter'][$param] ) ) {
