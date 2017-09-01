@@ -2,10 +2,12 @@
 /*
 Plugin Name: Rooftop CMS - Request Parser
 Description: Manipulate the REST request or server variables
-Version: 0.0.1
-Author: Error Studio
-Author URI: http://errorstudio.co.uk
-Plugin URI: http://errorstudio.co.uk
+Version: 1.2.1
+Author: RooftopCMS
+Author URI: https://rooftopcms.com
+Plugin URI: http://github.com/rooftopcms/rooftop-request-parser
+License: GPL-3.0+
+License URI: http://www.gnu.org/licenses/gpl-3.0.txt
 Text Domain: rooftop-request-parser
 */
 
