@@ -2,7 +2,7 @@
 /*
 Plugin Name: Rooftop CMS - Request Parser
 Description: Manipulate the REST request or server variables
-Version: 1.2.1
+Version: 1.2.2
 Author: RooftopCMS
 Author URI: https://rooftopcms.com
 Plugin URI: http://github.com/rooftopcms/rooftop-request-parser
@@ -54,9 +54,16 @@ add_action( 'rest_api_init', function() {
             global $post;
 
             $include_drafts = apply_filters( 'rooftop_include_drafts', false );
-            if( $post->post_status != 'publish' && !$include_drafts ) {
+
+            $deny_access_to_media_item = $post->post_type == 'attachment' && !in_array( $post->post_status, array( 'inherit', 'publish' ) );
+            $deny_access_to_draft_post = $post->post_status != 'publish' && !$include_drafts;
+
+            if( $deny_access_to_media_item ) {
+                $response = new Custom_WP_Error( 'unauthorized', 'Authentication failed', array( 'status'=>403 ) );
+            }elseif( $post->post_type != "attachment" && $deny_access_to_draft_post ) {
                 $response = new Custom_WP_Error( 'unauthorized', 'Authentication failed', array( 'status'=>403 ) );
             }
+
             return $response;
         });
 
